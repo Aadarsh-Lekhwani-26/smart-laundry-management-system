@@ -1,0 +1,71 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: #172b36;
+  background: #f3f6f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+.app {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+.welcome-card {
+  width: 100%;
+  max-width: 620px;
+  padding: 48px;
+  background: #ffffff;
+  border: 1px solid #e1e9e6;
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgb(23 43 54 / 7%);
+}
+
+.eyebrow {
+  color: #16806a;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+h1 {
+  margin: 20px 0 12px;
+  font-size: clamp(32px, 5vw, 46px);
+  letter-spacing: -1.5px;
+}
+
+.description {
+  color: #62716f;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 28px;
+  color: #37685b;
+  font-size: 13px;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  background: #20a37a;
+  border-radius: 50%;
+}
