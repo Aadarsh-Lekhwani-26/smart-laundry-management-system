@@ -175,7 +175,58 @@ function PlaceholderPage({ title, description }) {
     </section>
   );
 }
+//------------------------garment tracking---------------------------
+function GarmentTrackingPage({ orders }) {
+  const garments = orders.flatMap((order) =>
+    order.garments.map((garment, index) => ({
+      id: `${order.id}-${index}`,
+      orderId: order.id,
+      customerName: order.customerName,
+      garmentName: garment.name,
+      quantity: garment.quantity,
+      status: order.status,
+    }))
+  );
 
+  return (
+    <section className="content-card">
+      <div className="section-heading">
+        <div>
+          <h2>Garment Tracking</h2>
+          <p>Track garments recorded against each laundry order.</p>
+        </div>
+        <span className="coming-soon">
+          {garments.length} GARMENT RECORDS
+        </span>
+      </div>
+
+      {garments.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">♧</div>
+          <h3>No garments to track</h3>
+          <p>Create a laundry order to see its garments here.</p>
+        </div>
+      ) : (
+        <div className="orders-list">
+          {garments.map((garment) => (
+            <article className="order-list-item" key={garment.id}>
+              <div>
+                <strong>{garment.garmentName || "Unnamed garment"}</strong>
+                <p>
+                  {garment.orderId} · {garment.customerName}
+                </p>
+                <p>Quantity: {garment.quantity}</p>
+              </div>
+
+              <span className="order-status">{garment.status}</span>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+//------------------------_------------
 function OrdersPage({
     orders,
     onCreateOrder,
@@ -550,12 +601,7 @@ function App() {
     }
 
     if (activePage === "garments") {
-      return (
-        <PlaceholderPage
-          title="Garment Tracking"
-          description="Track garment quantities and identify discrepancies."
-        />
-      );
+      return <GarmentTrackingPage orders={orders} />;
     }
 
     return <Dashboard orders={orders} />;
