@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import NewOrder from "./NewOrder.jsx";
 import {
@@ -232,6 +231,7 @@ function GarmentTrackingPage({ orders }) {
 //------------------------_------------
   function OrdersPage({
     orders,
+    pricing,
     onCreateOrder,
     onAdvanceOrderStatus,
     onCancelOrder,
@@ -282,6 +282,7 @@ function GarmentTrackingPage({ orders }) {
         }}
         onSubmit={handleSubmit}
         errors={errors}
+        pricing={pricing}
       />
     );
   }
@@ -526,6 +527,10 @@ function App() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [storageError, setStorageError] = useState("");
+  const [pricing, setPricing] = useState({ ...PRICING });
+  const [isPricingSaving, setIsPricingSaving] = useState(false);
+  const [pricingMessage, setPricingMessage] = useState("");
+  const [pricingError, setPricingError] = useState("");
 
   useEffect(() => {
     let isMounted = true;
@@ -564,12 +569,53 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSavedPricing() {
+      try {
+        const savedPricing = await window.laundryApp.loadPricing();
+
+        if (
+          !savedPricing ||
+          !Number.isFinite(Number(savedPricing.washing)) ||
+          !Number.isFinite(Number(savedPricing.ironing)) ||
+          Number(savedPricing.washing) < 0 ||
+          Number(savedPricing.ironing) < 0
+        ) {
+          throw new Error("The saved pricing data is invalid.");
+        }
+
+        if (isMounted) {
+          setPricing({
+            washing: Number(savedPricing.washing),
+            ironing: Number(savedPricing.ironing),
+          });
+          setPricingError("");
+        }
+      } catch (error) {
+        console.error("Failed to load pricing:", error);
+        if (isMounted) {
+          setPricingError(
+            "Could not load saved prices. Please restart the app."
+          );
+        }
+      }
+    }
+
+    loadSavedPricing();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const currentPage = navigation.find(
     (item) => item.id === activePage
   );
 
   async function handleCreateOrder(details) {
-    const result = prepareOrder(details, orders);
+    const result = prepareOrder(details, orders, pricing);
 
     if (!result.success) {
       return result;
@@ -726,6 +772,40 @@ async function handleClearDeliveredOrders() {
 
 
   //----------------------------------------------------
+  async function handleSavePricing() {
+    const washing = Number(pricing.washing);
+    const ironing = Number(pricing.ironing);
+
+    if (
+      pricing.washing === "" ||
+      pricing.ironing === "" ||
+      !Number.isFinite(washing) ||
+      !Number.isFinite(ironing) ||
+      washing < 0 ||
+      ironing < 0
+    ) {
+      setPricingError("Prices must be valid, non-negative numbers.");
+      setPricingMessage("");
+      return;
+    }
+
+    const updatedPricing = { washing, ironing };
+    setIsPricingSaving(true);
+    setPricingError("");
+    setPricingMessage("");
+
+    try {
+      await window.laundryApp.savePricing(updatedPricing);
+      setPricing(updatedPricing);
+      setPricingMessage("Prices saved successfully.");
+    } catch (error) {
+      console.error("Failed to save pricing:", error);
+      setPricingError("Could not save prices. Please try again.");
+    } finally {
+      setIsPricingSaving(false);
+    }
+  }
+
   function renderPage() {
     if (isLoading) {
       return (
@@ -740,6 +820,7 @@ async function handleClearDeliveredOrders() {
       return (
         <OrdersPage
           orders={orders}
+          pricing={pricing}
           onCreateOrder={handleCreateOrder}
           onAdvanceOrderStatus={handleAdvanceOrderStatus}
           onCancelOrder={handleCancelOrder}
@@ -755,36 +836,92 @@ async function handleClearDeliveredOrders() {
           <div className="section-heading">
             <div>
               <h2>Pricing & Services</h2>
-              <p>Current laundry service rates per garment.</p>
+              <p>Set the rate charged for each garment and service.</p>
             </div>
           </div>
 
           <div className="stats-grid">
             <StatCard
               label="Washing"
-              value={`₹${PRICING.washing}`}
+              value={`₹${Number(pricing.washing) || 0}`}
               description="Per garment"
               icon="♧"
             />
-
             <StatCard
               label="Ironing"
-              value={`₹${PRICING.ironing}`}
+              value={`₹${Number(pricing.ironing) || 0}`}
               description="Per garment"
               icon="≋"
             />
-
             <StatCard
               label="Washing + Ironing"
-              value={`₹${PRICING.washing + PRICING.ironing}`}
+              value={`₹${(Number(pricing.washing) || 0) + (Number(pricing.ironing) || 0)}`}
               description="Per garment"
               icon="₹"
             />
           </div>
 
-          <p>
-            Prices are currently fixed. Rate management will be added next.
-          </p>
+          <div className="pricing-form" style={{ marginTop: "24px" }}>
+            <div className="form-group">
+              <label htmlFor="washing-price">Washing price (₹ per garment)</label>
+              <input
+                id="washing-price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={pricing.washing}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setPricing((previous) => ({
+                    ...previous,
+                    washing: value === "" ? "" : Number(value),
+                  }));
+                  setPricingMessage("");
+                  setPricingError("");
+                }}
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="ironing-price">Ironing price (₹ per garment)</label>
+              <input
+                id="ironing-price"
+                type="number"
+                min="0"
+                step="0.01"
+                value={pricing.ironing}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setPricing((previous) => ({
+                    ...previous,
+                    ironing: value === "" ? "" : Number(value),
+                  }));
+                  setPricingMessage("");
+                  setPricingError("");
+                }}
+              />
+            </div>
+
+            <button
+              type="button"
+              className="primary-button"
+              onClick={handleSavePricing}
+              disabled={isPricingSaving}
+            >
+              {isPricingSaving ? "Saving..." : "Save Prices"}
+            </button>
+
+            {pricingMessage && (
+              <p role="status" style={{ color: "#237a45", marginTop: "12px" }}>
+                {pricingMessage}
+              </p>
+            )}
+            {pricingError && (
+              <p role="alert" style={{ color: "#b42318", marginTop: "12px" }}>
+                {pricingError}
+              </p>
+            )}
+          </div>
         </section>
       );
     }

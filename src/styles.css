@@ -950,7 +950,7 @@ button {
   outline: 2px solid #b42318;
   outline-offset: 2px;
 }
-/* ------------------------------------
+/* ------------------------------------ */
 
 /* Order pricing summary */
 .order-price-summary {
@@ -979,3 +979,218 @@ button {
 }
 
 /* ------------------------------------------------------- */
+
+/* =========================================
+   PRICING PAGE â€” EDITABLE PRICE FIELDS
+   ========================================= */
+
+.pricing-form {
+  margin-top: 28px;
+  max-width: 620px;
+}
+
+.pricing-field {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 20px;
+}
+
+.pricing-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #344740;
+}
+
+.pricing-field input {
+  width: 100%;
+  max-width: 320px;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #dce6e0;
+  border-radius: 10px;
+  background-color: #fbfdfc;
+  color: #243a33;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.pricing-field input:hover {
+  border-color: #a9c9bb;
+}
+
+.pricing-field input:focus {
+  border-color: #168466;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(22, 132, 102, 0.12);
+}
+
+/* Save Prices button */
+
+.pricing-save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background-color: #147d64;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.pricing-save-button:hover:not(:disabled) {
+  background-color: #106a55;
+  box-shadow: 0 4px 12px rgba(20, 125, 100, 0.18);
+  transform: translateY(-1px);
+}
+
+.pricing-save-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pricing-save-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Success and error messages */
+
+.pricing-message {
+  margin-top: 14px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.pricing-message.success {
+  color: #16834e;
+}
+
+.pricing-message.error {
+  color: #c0392b;
+}
+
+/* =========================================
+   PRICING PAGE â€” EDITABLE PRICE FIELDS
+   ========================================= */
+
+.pricing-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 620px;
+  margin-top: 24px;
+}
+
+.pricing-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.pricing-form .form-group label {
+  color: #344740;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pricing-form .form-group input {
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 13px;
+  border: 1px solid #dce6e0;
+  border-radius: 9px;
+  background: #fbfdfc;
+  color: #243a33;
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.pricing-form .form-group input:hover {
+  border-color: #a9c9bb;
+}
+
+.pricing-form .form-group input:focus {
+  border-color: #168466;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(22, 132, 102, 0.12);
+}
+
+.pricing-form .primary-button {
+  min-height: 44px;
+  padding: 12px 22px;
+  border: 1px solid #147d64;
+  border-radius: 9px;
+  background: #147d64;
+  color: #fff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pricing-form .primary-button:hover:not(:disabled) {
+  background: #106a55;
+  box-shadow: 0 4px 12px rgba(20, 125, 100, 0.18);
+  transform: translateY(-1px);
+}
+
+.pricing-form .primary-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.pricing-form [role="status"],
+.pricing-form [role="alert"] {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.pricing-form [role="status"] {
+  color: #16834e !important;
+}
+
+.pricing-form [role="alert"] {
+  color: #c0392b !important;
+}
+
+/* Pricing summary cards */
+.pricing-form ~ .stats-grid,
+.content-card > .stats-grid {
+  margin-top: 26px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 560px) {
+  .pricing-form .form-group {
+    max-width: 100%;
+  }
+
+  .pricing-form .primary-button {
+    width: 100%;
+  }
+}

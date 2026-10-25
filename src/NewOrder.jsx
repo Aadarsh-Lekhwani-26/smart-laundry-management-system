@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { calculateOrderTotal } from "./orderUtils";
+import { calculateOrderTotal, PRICING } from "./orderUtils";
 
 const initialForm = {
   customerName: "",
@@ -11,9 +11,9 @@ const initialForm = {
   notes: "",
 };
 
-function NewOrder({ onCancel, onSubmit, errors = {} }) {
+function NewOrder({ onCancel, onSubmit, errors = {}, pricing = PRICING }) {
   const [form, setForm] = useState(initialForm);
-  const totalPrice = calculateOrderTotal(form.garments);
+  const totalPrice = calculateOrderTotal(form.garments, pricing);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -31,7 +31,7 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
         garmentIndex === index
           ? {
               ...garment,
-              [field]: field === "quantity" ? value : value,
+              [field]: value,
             }
           : garment
       ),
@@ -69,8 +69,6 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
     });
   }
 
-
-  //---------------functions defining above---------------
   return (
     <section className="content-card new-order-card">
       <div className="section-heading">
@@ -89,18 +87,17 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
       </div>
 
       <form onSubmit={handleSubmit} className="order-form">
-{/* --------------------- */}
         {Object.keys(errors).length > 0 && (
-            <div className="form-error-summary" role="alert">
-                <strong>Please correct the following:</strong>
-                <ul>
-                {Object.entries(errors).map(([field, message]) => (
-                    <li key={field}>{message}</li>
-                ))}
-                </ul>
-            </div>
-            )}
-{/* --------------------- */}
+          <div className="form-error-summary" role="alert">
+            <strong>Please correct the following:</strong>
+            <ul>
+              {Object.entries(errors).map(([field, message]) => (
+                <li key={field}>{message}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <h3>Customer details</h3>
 
         <div className="form-grid">
@@ -207,9 +204,16 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
                     handleGarmentChange(index, "service", event.target.value)
                   }
                 >
-                  <option value="washing">Washing — ₹30</option>
-                  <option value="ironing">Ironing — ₹15</option>
-                  <option value="both">Washing + Ironing — ₹45</option>
+                  <option value="washing">
+                    Washing — ₹{pricing.washing}
+                  </option>
+                  <option value="ironing">
+                    Ironing — ₹{pricing.ironing}
+                  </option>
+                  <option value="both">
+                    Washing + Ironing — ₹
+                    {pricing.washing + pricing.ironing}
+                  </option>
                 </select>
               </label>
 
@@ -264,7 +268,7 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
             />
           </label>
         </div>
-        
+
         <div className="order-price-summary">
           <span>Estimated Total</span>
           <strong>₹{totalPrice}</strong>
@@ -289,4 +293,3 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
 }
 
 export default NewOrder;
-
