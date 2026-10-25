@@ -10,7 +10,7 @@ const initialForm = {
   notes: "",
 };
 
-function NewOrder({ onCancel, onSubmit }) {
+function NewOrder({ onCancel, onSubmit, errors = {} }) {
   const [form, setForm] = useState(initialForm);
 
   function handleChange(event) {
@@ -84,6 +84,18 @@ function NewOrder({ onCancel, onSubmit }) {
       </div>
 
       <form onSubmit={handleSubmit} className="order-form">
+{/* --------------------- */}
+        {Object.keys(errors).length > 0 && (
+            <div className="form-error-summary" role="alert">
+                <strong>Please correct the following:</strong>
+                <ul>
+                {Object.entries(errors).map(([field, message]) => (
+                    <li key={field}>{message}</li>
+                ))}
+                </ul>
+            </div>
+            )}
+{/* --------------------- */}
         <h3>Customer details</h3>
 
         <div className="form-grid">
