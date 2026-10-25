@@ -752,3 +752,34 @@ button {
   }
 }
 
+/* //------------------order status button------------------ */
+.order-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.secondary-button {
+  border: 1px solid #cbd8d3;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #ffffff;
+  color: #245c49;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.secondary-button:hover {
+  background: #edf6f1;
+  border-color: #8bb5a2;
+}
+
+.secondary-button:focus-visible {
+  outline: 2px solid #245c49;
+  outline-offset: 2px;
+}

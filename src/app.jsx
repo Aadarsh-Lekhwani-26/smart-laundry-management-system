@@ -1,7 +1,13 @@
 
 import { useEffect, useState } from "react";
 import NewOrder from "./NewOrder.jsx";
-import { prepareOrder } from "./orderUtils.js";
+import {
+  prepareOrder,
+  getNextOrderStatus,
+  updateOrderStatus
+} from "./orderUtils.js";
+
+
 
 const navigation = [
   { id: "dashboard", label: "Dashboard", icon: "◫" },
@@ -169,7 +175,11 @@ function PlaceholderPage({ title, description }) {
   );
 }
 
-function OrdersPage({ orders, onCreateOrder }) {
+function OrdersPage({
+  orders,
+  onCreateOrder,
+  onAdvanceOrderStatus,
+}) {
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -238,7 +248,19 @@ function OrdersPage({ orders, onCreateOrder }) {
                   </p>
                 </div>
 
-                <span className="order-status">{order.status}</span>
+                <div className="order-actions">
+                  <span className="order-status">{order.status}</span>
+
+                  {getNextOrderStatus(order.status) && (
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => onAdvanceOrderStatus(order.id)}
+                    >
+                      Move to {getNextOrderStatus(order.status)}
+                    </button>
+                  )}
+                </div>
               </article>
             ))}
           </div>
@@ -327,7 +349,43 @@ function App() {
       };
     }
   }
+  //---------------------- status-change handler ------------------------------
+  
+  async function handleAdvanceOrderStatus(orderId) {
+    const currentOrder = orders.find((order) => order.id === orderId);
 
+    if (!currentOrder) {
+      return;
+    }
+
+    const nextStatus = getNextOrderStatus(currentOrder.status);
+
+    if (!nextStatus) {
+      return;
+    }
+
+    const result = updateOrderStatus(currentOrder, nextStatus);
+
+    if (!result.success) {
+      return;
+    }
+
+    const updatedOrders = orders.map((order) =>
+      order.id === orderId ? result.order : order
+    );
+
+    try {
+      await window.laundryApp.saveOrders(updatedOrders);
+      setOrders(updatedOrders);
+      setStorageError("");
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      setStorageError(
+        "Could not save the status update. Please try again."
+      );
+    }
+  } 
+  //----------------------------------------------------
   function renderPage() {
     if (isLoading) {
       return (
@@ -343,6 +401,7 @@ function App() {
         <OrdersPage
           orders={orders}
           onCreateOrder={handleCreateOrder}
+          onAdvanceOrderStatus={handleAdvanceOrderStatus}
         />
       );
     }
