@@ -494,3 +494,192 @@ button {
     font-size: 9px;
   }
 }
+
+/* newOrder styles added below */
+
+/* New Order Form */
+
+.new-order-card {
+  max-width: 100%;
+}
+
+.new-order-card .section-heading h2 {
+  margin: 0 0 8px;
+}
+
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.order-form h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.form-field > span {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #253044);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid var(--border-color, #dfe4ec);
+  border-radius: 8px;
+  background: var(--input-background, #fff);
+  color: var(--text-primary, #253044);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  border-color: #5685e8;
+  box-shadow: 0 0 0 3px rgb(86 133 232 / 12%);
+}
+
+.form-field textarea {
+  resize: vertical;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.form-section-heading p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary, #778195);
+}
+
+.garment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.garment-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(100px, 1fr) 36px;
+  gap: 12px;
+  align-items: end;
+  padding: 14px;
+  border: 1px solid var(--border-color, #e1e6ee);
+  border-radius: 10px;
+  background: var(--surface-background, #fff);
+}
+
+.quantity-field {
+  max-width: 180px;
+}
+
+.remove-garment-button {
+  width: 36px;
+  height: 40px;
+  border: 1px solid #f0d4d4;
+  border-radius: 8px;
+  background: #fff7f7;
+  color: #bd4545;
+  font-size: 23px;
+  cursor: pointer;
+}
+
+.remove-garment-button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.form-section-title {
+  margin-top: 4px !important;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color, #e1e6ee);
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary-button {
+  border: 1px solid #315fca;
+  background: #315fca;
+  color: white;
+}
+
+.primary-button:hover {
+  background: #254eae;
+}
+
+.secondary-button {
+  border: 1px solid var(--border-color, #dfe4ec);
+  background: white;
+  color: var(--text-primary, #253044);
+}
+
+.secondary-button:hover {
+  background: #f5f7fa;
+}
+
+@media (max-width: 650px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .garment-row {
+    grid-template-columns: minmax(0, 1fr) 90px 32px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .form-section-heading {
+    align-items: flex-start;
+  }
+}
