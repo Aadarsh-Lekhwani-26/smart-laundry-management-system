@@ -4,6 +4,7 @@ import NewOrder from "./NewOrder.jsx";
 import {
   ORDER_STATUSES,
   CANCELLED_STATUS,
+  PRICING,
   prepareOrder,
   getNextOrderStatus,
   updateOrderStatus,
@@ -750,10 +751,41 @@ async function handleClearDeliveredOrders() {
 
     if (activePage === "pricing") {
       return (
-        <PlaceholderPage
-          title="Transparent Pricing"
-          description="Manage washing and ironing prices and calculate bills."
-        />
+        <section className="content-card">
+          <div className="section-heading">
+            <div>
+              <h2>Pricing & Services</h2>
+              <p>Current laundry service rates per garment.</p>
+            </div>
+          </div>
+
+          <div className="stats-grid">
+            <StatCard
+              label="Washing"
+              value={`₹${PRICING.washing}`}
+              description="Per garment"
+              icon="♧"
+            />
+
+            <StatCard
+              label="Ironing"
+              value={`₹${PRICING.ironing}`}
+              description="Per garment"
+              icon="≋"
+            />
+
+            <StatCard
+              label="Washing + Ironing"
+              value={`₹${PRICING.washing + PRICING.ironing}`}
+              description="Per garment"
+              icon="₹"
+            />
+          </div>
+
+          <p>
+            Prices are currently fixed. Rate management will be added next.
+          </p>
+        </section>
       );
     }
 
