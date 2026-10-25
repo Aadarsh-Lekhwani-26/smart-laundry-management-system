@@ -35,5 +35,22 @@
     "vite": "^8.3.5",
     "vitest": "^4.1.12",
     "wait-on": "^9.5.1"
+  },
+  "build": {
+    "appId": "com.aadarsh.smartlaundry",
+    "productName": "Smart Laundry Management System",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json",
+      "node_modules/**/*"
+    ],
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.business"
+    }
   }
 }
