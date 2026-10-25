@@ -4,7 +4,8 @@ import NewOrder from "./NewOrder.jsx";
 import {
   prepareOrder,
   getNextOrderStatus,
-  updateOrderStatus
+  updateOrderStatus,
+  ORDER_STATUSES
 } from "./orderUtils.js";
 
 
@@ -183,20 +184,22 @@ function OrdersPage({
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
   //----------------searching orders
-  const filteredOrders = orders.filter((order) => {
   const query = searchQuery.trim().toLowerCase();
 
-    if (!query) {
-      return true;
-    }
-
-    return (
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      !query ||
       order.customerName.toLowerCase().includes(query) ||
       order.phone.includes(query) ||
-      order.id.toLowerCase().includes(query)
-    );
+      order.id.toLowerCase().includes(query);
+
+    const matchesStatus =
+      statusFilter === "All" || order.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
   });
   //---------------------------------------e
 
@@ -263,6 +266,37 @@ function OrdersPage({
               aria-label="Clear search"
             >
               ×
+            </button>
+          )}
+        </div>
+
+        <div className="order-filter">
+          <label htmlFor="order-status-filter">Filter by status:</label>
+
+          <select
+            id="order-status-filter"
+            value={statusFilter}
+            onChange={(event) => setStatusFilter(event.target.value)}
+          >
+            <option value="All">All statuses</option>
+
+            {ORDER_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {status}
+              </option>
+            ))}
+          </select>
+
+          {(statusFilter !== "All" || searchQuery) && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => {
+                setStatusFilter("All");
+                setSearchQuery("");
+              }}
+            >
+              Clear filters
             </button>
           )}
         </div>
