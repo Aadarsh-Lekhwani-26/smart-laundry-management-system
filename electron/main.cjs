@@ -112,42 +112,101 @@ async function saveOrders(orders) {
 }
 
 function registerStorageHandlers() {
-  ipcMain.handle("orders:load", async () => {
-    return loadOrders();
-  });
+  ipcMain.handle("orders:load", async () => loadOrders());
 
   ipcMain.handle("orders:save", async (_event, orders) => {
     return saveOrders(orders);
   });
 
-  ipcMain.handle("pricing:load", async () => {
-    return loadPricing();
-  });
+  ipcMain.handle("pricing:load", async () => loadPricing());
 
   ipcMain.handle("pricing:save", async (_event, pricing) => {
     return savePricing(pricing);
   });
 }
 
+let mainWindow = null;
+
 function createWindow() {
-  const window = new BrowserWindow({
+  const isPackaged = app.isPackaged;
+
+  // app.getAppPath() resolves to the application root,
+  // including Resources/app.asar in a packaged macOS app.
+  const appPath = app.getAppPath();
+
+  const preloadPath = path.join(
+    appPath,
+    "electron",
+    "preload.cjs"
+  );
+
+  const productionHtmlPath = path.join(
+    appPath,
+    "dist",
+    "index.html"
+  );
+
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     minWidth: 900,
     minHeight: 600,
     backgroundColor: "#f3f6f5",
+    show: false,
     webPreferences: {
-      preload: path.join(__dirname, "preload.cjs"),
+      preload: preloadPath,
       nodeIntegration: false,
       contextIsolation: true,
     },
   });
 
-  if (app.isPackaged) {
-    window.loadFile(path.join(__dirname, "../dist/index.html"));
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
+  });
+
+  mainWindow.webContents.on(
+    "did-fail-load",
+    (_event, errorCode, errorDescription, validatedURL) => {
+      console.error("Failed to load application:", {
+        errorCode,
+        errorDescription,
+        validatedURL,
+      });
+    }
+  );
+
+  mainWindow.webContents.on("render-process-gone", (_event, details) => {
+    console.error("Renderer process exited:", details);
+  });
+
+  mainWindow.webContents.on("preload-error", (_event, preloadPath, error) => {
+    console.error("Preload script failed:", preloadPath, error);
+  });
+
+  mainWindow.webContents.on("console-message", (_event, details) => {
+    if (details.level >= 2) {
+      console.error("Renderer console error:", details.message);
+    }
+  });
+
+  if (isPackaged) {
+    console.log("Packaged application path:", appPath);
+    console.log("Loading production HTML:", productionHtmlPath);
+
+    mainWindow.loadFile(productionHtmlPath).catch((error) => {
+      console.error("Could not load production HTML:", error);
+      mainWindow?.show();
+    });
   } else {
-    window.loadURL("http://127.0.0.1:5173");
+    mainWindow.loadURL("http://127.0.0.1:5173").catch((error) => {
+      console.error("Could not load Vite development server:", error);
+      mainWindow?.show();
+    });
   }
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
 app.whenReady().then(() => {
