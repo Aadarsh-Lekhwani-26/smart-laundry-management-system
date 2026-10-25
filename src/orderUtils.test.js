@@ -3,6 +3,7 @@ import {
   generateOrderId,
   createOrder,
   validateOrder,
+  prepareOrder,
 } from "./orderUtils.js";
 
 
@@ -155,3 +156,47 @@ describe("validateOrder", () => {
   });
 });
 //-----------------------------------------------------------
+describe("prepareOrder", () => {
+  const validDetails = {
+    customerName: "Aadarsh",
+    phone: "9876543210",
+    pickupAddress: "Pune",
+    garments: [{ name: "Shirt", quantity: 2 }],
+    pickupDate: "2026-10-26",
+    deliveryDate: "2026-10-28",
+  };
+
+  it("creates a valid order with the first ID", () => {
+    const result = prepareOrder(validDetails);
+
+    expect(result.success).toBe(true);
+    expect(result.order.id).toBe("ORD-0001");
+    expect(result.order.status).toBe("Received");
+    expect(result.errors).toEqual({});
+  });
+
+  it("generates the next ID based on existing orders", () => {
+    const existingOrders = [
+      { id: "ORD-0001" },
+      { id: "ORD-0002" },
+    ];
+
+    const result = prepareOrder(validDetails, existingOrders);
+
+    expect(result.success).toBe(true);
+    expect(result.order.id).toBe("ORD-0003");
+  });
+
+  it("does not create an order when validation fails", () => {
+    const result = prepareOrder({
+      ...validDetails,
+      customerName: "",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.order).toBeNull();
+    expect(result.errors.customerName).toBeTruthy();
+  });
+});
+//-----------------------------------------------------------
+

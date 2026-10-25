@@ -1,4 +1,6 @@
 
+
+//--------------------------------------------------------
 export const ORDER_STATUSES = [
   "Received",
   "Washing",
@@ -6,7 +8,7 @@ export const ORDER_STATUSES = [
   "Ready for Delivery",
   "Delivered",
 ];
-
+//--------------------------------------------------------
 export function generateOrderId(existingOrders = []) {
   const highestNumber = existingOrders.reduce((highest, order) => {
     const match = order.id?.match(/^ORD-(\d+)$/);
@@ -20,7 +22,7 @@ export function generateOrderId(existingOrders = []) {
 
   return `ORD-${String(highestNumber + 1).padStart(4, "0")}`;
 }
-
+//--------------------------------------------------------
 export function createOrder({
   customerName,
   phone,
@@ -47,6 +49,7 @@ export function createOrder({
   };
 }
 
+//--------------------------------------------------------
 export function validateOrder(order) {
   const errors = {};
 
@@ -100,3 +103,27 @@ export function validateOrder(order) {
     errors,
   };
 }
+
+//--------------------------------------------------------
+export function prepareOrder(orderDetails, existingOrders = []) {
+  const validation = validateOrder(orderDetails);
+
+  if (!validation.isValid) {
+    return {
+      success: false,
+      errors: validation.errors,
+      order: null,
+    };
+  }
+
+  const order = createOrder(orderDetails);
+  order.id = generateOrderId(existingOrders);
+
+  return {
+    success: true,
+    errors: {},
+    order,
+  };
+}
+
+//--------------------------------------------------------
