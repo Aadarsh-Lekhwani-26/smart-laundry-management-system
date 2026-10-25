@@ -127,3 +127,60 @@ export function prepareOrder(orderDetails, existingOrders = []) {
 }
 
 //--------------------------------------------------------
+
+//order status management
+export function getNextOrderStatus(currentStatus) {
+  const currentIndex = ORDER_STATUSES.indexOf(currentStatus);
+
+  if (currentIndex === -1) {
+    return null;
+  }
+
+  if (currentIndex === ORDER_STATUSES.length - 1) {
+    return null;
+  }
+
+  return ORDER_STATUSES[currentIndex + 1];
+}
+
+export function updateOrderStatus(order, newStatus) {
+  if (!ORDER_STATUSES.includes(newStatus)) {
+    return {
+      success: false,
+      error: "Invalid order status.",
+      order: null,
+    };
+  }
+
+  const currentIndex = ORDER_STATUSES.indexOf(order.status);
+  const newIndex = ORDER_STATUSES.indexOf(newStatus);
+
+  if (currentIndex === -1) {
+    return {
+      success: false,
+      error: "The current order status is invalid.",
+      order: null,
+    };
+  }
+
+  if (newIndex !== currentIndex + 1) {
+    return {
+      success: false,
+      error: "Orders can only advance to the next status.",
+      order: null,
+    };
+  }
+
+  return {
+    success: true,
+    error: null,
+    order: {
+      ...order,
+      status: newStatus,
+      updatedAt: new Date().toISOString(),
+    },
+  };
+}
+
+//--------------------------------------------------------
+

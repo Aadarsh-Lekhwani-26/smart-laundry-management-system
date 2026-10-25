@@ -4,6 +4,8 @@ import {
   createOrder,
   validateOrder,
   prepareOrder,
+  getNextOrderStatus,
+  updateOrderStatus
 } from "./orderUtils.js";
 
 
@@ -199,4 +201,72 @@ describe("prepareOrder", () => {
   });
 });
 //-----------------------------------------------------------
+//order status management testing
 
+describe("getNextOrderStatus", () => {
+  it("returns the next status", () => {
+    expect(getNextOrderStatus("Received")).toBe("Washing");
+    expect(getNextOrderStatus("Washing")).toBe("Ironing");
+    expect(getNextOrderStatus("Ironing")).toBe("Ready for Delivery");
+    expect(getNextOrderStatus("Ready for Delivery")).toBe("Delivered");
+  });
+
+  it("returns null when the order is delivered", () => {
+    expect(getNextOrderStatus("Delivered")).toBeNull();
+  });
+
+  it("returns null for an unknown status", () => {
+    expect(getNextOrderStatus("Unknown")).toBeNull();
+  });
+});
+
+describe("updateOrderStatus", () => {
+  const order = {
+    id: "ORD-0001",
+    customerName: "Test Customer",
+    status: "Received",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  it("advances an order to the next status", () => {
+    const result = updateOrderStatus(order, "Washing");
+
+    expect(result.success).toBe(true);
+    expect(result.order.status).toBe("Washing");
+    expect(result.order.id).toBe("ORD-0001");
+    expect(result.order.updatedAt).not.toBe(order.updatedAt);
+  });
+
+  it("rejects skipping a status", () => {
+    const result = updateOrderStatus(order, "Delivered");
+
+    expect(result.success).toBe(false);
+    expect(result.order).toBeNull();
+  });
+
+  it("rejects an invalid status", () => {
+    const result = updateOrderStatus(order, "Unknown");
+
+    expect(result.success).toBe(false);
+    expect(result.order).toBeNull();
+  });
+
+  it("does not modify the original order", () => {
+    updateOrderStatus(order, "Washing");
+
+    expect(order.status).toBe("Received");
+  });
+
+  it("rejects advancing an already delivered order", () => {
+    const deliveredOrder = {
+      ...order,
+      status: "Delivered",
+    };
+
+    const result = updateOrderStatus(deliveredOrder, "Received");
+
+    expect(result.success).toBe(false);
+  });
+});
+
+//-------------------------------------------------------------------
