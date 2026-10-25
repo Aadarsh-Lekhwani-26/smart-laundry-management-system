@@ -1,5 +1,3 @@
-
-
 //--------------------------------------------------------
 export const ORDER_STATUSES = [
   "Received",
@@ -16,25 +14,26 @@ export const PRICING = {
   washing: 30,
   ironing: 15,
 };
+
 //--------------------------------------------------------
-// Calculate the total price of all garments in an order
-export function calculateOrderTotal(garments = []) {
+// Calculate the total price using supplied pricing or defaults
+export function calculateOrderTotal(garments = [], pricing = PRICING) {
   return garments.reduce((total, garment) => {
     const quantity = Number(garment.quantity) || 0;
     let pricePerGarment = 0;
 
     if (garment.service === "washing") {
-      pricePerGarment = PRICING.washing;
+      pricePerGarment = pricing.washing;
     } else if (garment.service === "ironing") {
-      pricePerGarment = PRICING.ironing;
+      pricePerGarment = pricing.ironing;
     } else if (garment.service === "both") {
-      pricePerGarment = PRICING.washing + PRICING.ironing;
+      pricePerGarment = pricing.washing + pricing.ironing;
     }
 
     return total + pricePerGarment * quantity;
   }, 0);
 }
-//--------------------------------------------------------
+
 //--------------------------------------------------------
 export function generateOrderId(existingOrders = []) {
   const highestNumber = existingOrders.reduce((highest, order) => {
@@ -49,8 +48,8 @@ export function generateOrderId(existingOrders = []) {
 
   return `ORD-${String(highestNumber + 1).padStart(4, "0")}`;
 }
-//--------------------------------------------------------
 
+//--------------------------------------------------------
 export function createOrder({
   customerName,
   phone,
@@ -59,6 +58,7 @@ export function createOrder({
   pickupDate,
   deliveryDate,
   notes = "",
+  pricing = PRICING,
 }) {
   const now = new Date().toISOString();
 
@@ -71,13 +71,12 @@ export function createOrder({
     pickupDate,
     deliveryDate,
     notes: notes.trim(),
-    totalPrice: calculateOrderTotal(garments),
+    totalPrice: calculateOrderTotal(garments, pricing),
     status: "Received",
     createdAt: now,
     updatedAt: now,
   };
 }
-
 
 //--------------------------------------------------------
 export function validateOrder(order) {
@@ -108,7 +107,8 @@ export function validateOrder(order) {
     );
 
     if (invalidGarment) {
-      errors.garments = "Each garment needs a name and a positive whole-number quantity.";
+      errors.garments =
+        "Each garment needs a name and a positive whole-number quantity.";
     }
   }
 
@@ -135,7 +135,11 @@ export function validateOrder(order) {
 }
 
 //--------------------------------------------------------
-export function prepareOrder(orderDetails, existingOrders = []) {
+export function prepareOrder(
+  orderDetails,
+  existingOrders = [],
+  pricing = PRICING
+) {
   const validation = validateOrder(orderDetails);
 
   if (!validation.isValid) {
@@ -146,7 +150,11 @@ export function prepareOrder(orderDetails, existingOrders = []) {
     };
   }
 
-  const order = createOrder(orderDetails);
+  const order = createOrder({
+    ...orderDetails,
+    pricing,
+  });
+
   order.id = generateOrderId(existingOrders);
 
   return {
@@ -157,8 +165,7 @@ export function prepareOrder(orderDetails, existingOrders = []) {
 }
 
 //--------------------------------------------------------
-
-//order status management
+// Order status management
 export function getNextOrderStatus(currentStatus) {
   if (currentStatus === CANCELLED_STATUS) {
     return null;
@@ -177,9 +184,7 @@ export function getNextOrderStatus(currentStatus) {
   return ORDER_STATUSES[currentIndex + 1];
 }
 
-
 export function updateOrderStatus(order, newStatus) {
-
   if (order.status === CANCELLED_STATUS) {
     return {
       success: false,
@@ -226,9 +231,7 @@ export function updateOrderStatus(order, newStatus) {
   };
 }
 
-//------------------------order cancelling--------------------------------
-
-
+//------------------------ Order cancelling ------------------------
 export function cancelOrder(order) {
   if (!order) {
     return {
@@ -265,5 +268,4 @@ export function cancelOrder(order) {
   };
 }
 
-//-----------------------------------------------------------
-
+//--------------------------------------------------------

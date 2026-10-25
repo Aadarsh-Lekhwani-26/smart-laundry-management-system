@@ -6,6 +6,69 @@ function getOrdersFilePath() {
   return path.join(app.getPath("userData"), "orders.json");
 }
 
+function getPricingFilePath() {
+  return path.join(app.getPath("userData"), "pricing.json");
+}
+
+const DEFAULT_PRICING = {
+  washing: 30,
+  ironing: 15,
+};
+
+async function loadPricing() {
+  const filePath = getPricingFilePath();
+
+  try {
+    const fileContents = await fs.readFile(filePath, "utf8");
+    const pricing = JSON.parse(fileContents);
+
+    if (
+      !pricing ||
+      !Number.isFinite(pricing.washing) ||
+      !Number.isFinite(pricing.ironing) ||
+      pricing.washing < 0 ||
+      pricing.ironing < 0
+    ) {
+      throw new Error("Stored pricing data is invalid.");
+    }
+
+    return pricing;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return { ...DEFAULT_PRICING };
+    }
+
+    throw error;
+  }
+}
+
+async function savePricing(pricing) {
+  if (
+    !pricing ||
+    !Number.isFinite(pricing.washing) ||
+    !Number.isFinite(pricing.ironing) ||
+    pricing.washing < 0 ||
+    pricing.ironing < 0
+  ) {
+    throw new Error("Invalid pricing values.");
+  }
+
+  const filePath = getPricingFilePath();
+  const temporaryFilePath = `${filePath}.tmp`;
+
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+
+  await fs.writeFile(
+    temporaryFilePath,
+    JSON.stringify(pricing, null, 2),
+    "utf8"
+  );
+
+  await fs.rename(temporaryFilePath, filePath);
+
+  return { success: true };
+}
+
 async function loadOrders() {
   const filePath = getOrdersFilePath();
 
@@ -55,6 +118,14 @@ function registerStorageHandlers() {
 
   ipcMain.handle("orders:save", async (_event, orders) => {
     return saveOrders(orders);
+  });
+
+  ipcMain.handle("pricing:load", async () => {
+    return loadPricing();
+  });
+
+  ipcMain.handle("pricing:save", async (_event, pricing) => {
+    return savePricing(pricing);
   });
 }
 

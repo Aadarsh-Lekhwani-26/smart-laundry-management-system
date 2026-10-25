@@ -9,4 +9,8 @@ contextBridge.exposeInMainWorld("laundryApp", {
   loadOrders: () => ipcRenderer.invoke("orders:load"),
 
   saveOrders: (orders) => ipcRenderer.invoke("orders:save", orders),
+
+  loadPricing: () => ipcRenderer.invoke("pricing:load"),
+
+  savePricing: (pricing) => ipcRenderer.invoke("pricing:save", pricing),
 });
