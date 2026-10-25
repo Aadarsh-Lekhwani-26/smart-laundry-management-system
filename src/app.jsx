@@ -176,12 +176,29 @@ function PlaceholderPage({ title, description }) {
 }
 
 function OrdersPage({
-  orders,
-  onCreateOrder,
-  onAdvanceOrderStatus,
-}) {
+    orders,
+    onCreateOrder,
+    onAdvanceOrderStatus,
+  }) {
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+
+  //----------------searching orders
+  const filteredOrders = orders.filter((order) => {
+  const query = searchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return true;
+    }
+
+    return (
+      order.customerName.toLowerCase().includes(query) ||
+      order.phone.includes(query) ||
+      order.id.toLowerCase().includes(query)
+    );
+  });
+  //---------------------------------------e
 
   async function handleSubmit(details) {
     const result = await onCreateOrder(details);
@@ -225,46 +242,74 @@ function OrdersPage({
             + New Order
           </button>
         </div>
+        <div className="order-search">
+          <span className="search-icon" aria-hidden="true">
+            ⌕
+          </span>
 
-        {orders.length === 0 ? (
+          <input
+            type="search"
+            aria-label="Search orders"
+            placeholder="Search by customer name, phone, or order ID..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+
+          {searchQuery && (
+            <button
+              type="button"
+              className="clear-search-button"
+              onClick={() => setSearchQuery("")}
+              aria-label="Clear search"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
+        {filteredOrders.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">▤</div>
-            <h3>No orders yet</h3>
-            <p>Create your first order to get started.</p>
+            <h3>{orders.length === 0 ? "No orders yet" : "No matching orders"}</h3>
+            <p>
+              {orders.length === 0
+                ? "Create your first order to get started."
+                : "Try another customer name, phone number, or order ID."}
+            </p>
           </div>
         ) : (
-          <div className="orders-list">
-            {orders.map((order) => (
-              <article className="order-list-item" key={order.id}>
-                <div>
-                  <strong>{order.customerName}</strong>
-                  <p>{order.id} · {order.phone}</p>
-                  <p>
-                    {order.garments.reduce(
-                      (total, garment) => total + garment.quantity,
-                      0
-                    )}{" "}
-                    garments · Delivery: {order.deliveryDate}
-                  </p>
-                </div>
+            <div className="orders-list">
+              {filteredOrders.map((order) => (
+                <article className="order-list-item" key={order.id}>
+                  <div>
+                    <strong>{order.customerName}</strong>
+                    <p>{order.id} · {order.phone}</p>
+                    <p>
+                      {order.garments.reduce(
+                        (total, garment) => total + garment.quantity,
+                        0
+                      )}{" "}
+                      garments · Delivery: {order.deliveryDate}
+                    </p>
+                  </div>
 
-                <div className="order-actions">
-                  <span className="order-status">{order.status}</span>
+                  <div className="order-actions">
+                    <span className="order-status">{order.status}</span>
 
-                  {getNextOrderStatus(order.status) && (
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => onAdvanceOrderStatus(order.id)}
-                    >
-                      Move to {getNextOrderStatus(order.status)}
-                    </button>
-                  )}
-                </div>
-              </article>
-            ))}
-          </div>
-        )}
+                    {getNextOrderStatus(order.status) && (
+                      <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={() => onAdvanceOrderStatus(order.id)}
+                      >
+                        Move to {getNextOrderStatus(order.status)}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
       </section>
     </>
   );
