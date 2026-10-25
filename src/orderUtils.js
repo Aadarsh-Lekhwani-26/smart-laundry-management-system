@@ -10,6 +10,31 @@ export const ORDER_STATUSES = [
 ];
 
 export const CANCELLED_STATUS = "Cancelled";
+
+// Pricing configuration (amounts in INR per garment)
+export const PRICING = {
+  washing: 30,
+  ironing: 15,
+};
+//--------------------------------------------------------
+// Calculate the total price of all garments in an order
+export function calculateOrderTotal(garments = []) {
+  return garments.reduce((total, garment) => {
+    const quantity = Number(garment.quantity) || 0;
+    let pricePerGarment = 0;
+
+    if (garment.service === "washing") {
+      pricePerGarment = PRICING.washing;
+    } else if (garment.service === "ironing") {
+      pricePerGarment = PRICING.ironing;
+    } else if (garment.service === "both") {
+      pricePerGarment = PRICING.washing + PRICING.ironing;
+    }
+
+    return total + pricePerGarment * quantity;
+  }, 0);
+}
+//--------------------------------------------------------
 //--------------------------------------------------------
 export function generateOrderId(existingOrders = []) {
   const highestNumber = existingOrders.reduce((highest, order) => {

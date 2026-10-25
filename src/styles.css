@@ -589,13 +589,13 @@ button {
 
 .garment-row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(100px, 1fr) 36px;
-  gap: 12px;
+  grid-template-columns: minmax(0, 2fr) minmax(100px, 0.7fr) minmax(190px, 1.2fr) auto;
+  gap: 14px;
   align-items: end;
-  padding: 14px;
-  border: 1px solid var(--border-color, #e1e6ee);
-  border-radius: 10px;
-  background: var(--surface-background, #fff);
+  padding: 18px;
+  border: 1px solid #dfe7e3;
+  border-radius: 12px;
+  background: #ffffff;
 }
 
 .quantity-field {
@@ -674,9 +674,19 @@ button {
   }
 
   .garment-row {
-    grid-template-columns: minmax(0, 1fr) 90px 32px;
-    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) 80px;
+    gap: 10px;
     padding: 10px;
+  }
+
+  .garment-row .form-field:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+
+  .garment-row .remove-garment-button {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
   }
 
   .form-section-heading {
@@ -941,3 +951,31 @@ button {
   outline-offset: 2px;
 }
 /* ------------------------------------
+
+/* Order pricing summary */
+.order-price-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: #edf7f2;
+  border: 1px solid #cce8da;
+  border-radius: 12px;
+}
+
+.order-price-summary span {
+  color: #426358;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.order-price-summary strong {
+  color: #13795b;
+  font-size: 26px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------- */

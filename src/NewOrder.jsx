@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { calculateOrderTotal } from "./orderUtils";
 
 const initialForm = {
   customerName: "",
   phone: "",
   pickupAddress: "",
-  garments: [{ name: "Shirt", quantity: 1 }],
+  garments: [{ name: "Shirt", quantity: 1, service: "washing" }],
   pickupDate: "",
   deliveryDate: "",
   notes: "",
@@ -12,6 +13,7 @@ const initialForm = {
 
 function NewOrder({ onCancel, onSubmit, errors = {} }) {
   const [form, setForm] = useState(initialForm);
+  const totalPrice = calculateOrderTotal(form.garments);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -39,7 +41,10 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
   function addGarment() {
     setForm((previous) => ({
       ...previous,
-      garments: [...previous.garments, { name: "", quantity: 1 }],
+      garments: [
+        ...previous.garments,
+        { name: "", quantity: 1, service: "washing" },
+      ],
     }));
   }
 
@@ -194,6 +199,20 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
                 />
               </label>
 
+              <label className="form-field">
+                <span>Service</span>
+                <select
+                  value={garment.service || "washing"}
+                  onChange={(event) =>
+                    handleGarmentChange(index, "service", event.target.value)
+                  }
+                >
+                  <option value="washing">Washing — ₹30</option>
+                  <option value="ironing">Ironing — ₹15</option>
+                  <option value="both">Washing + Ironing — ₹45</option>
+                </select>
+              </label>
+
               <button
                 type="button"
                 className="remove-garment-button"
@@ -244,6 +263,11 @@ function NewOrder({ onCancel, onSubmit, errors = {} }) {
               rows={3}
             />
           </label>
+        </div>
+        
+        <div className="order-price-summary">
+          <span>Estimated Total</span>
+          <strong>₹{totalPrice}</strong>
         </div>
 
         <div className="form-actions">
