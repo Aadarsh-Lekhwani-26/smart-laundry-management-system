@@ -49,7 +49,7 @@ function Sidebar({ activePage, onNavigate }) {
   );
 }
 
-function Dashboard() {
+function Dashboard({ orders }) {
   return (
     <>
       <div className="welcome-banner">
@@ -67,25 +67,36 @@ function Dashboard() {
       <section className="stats-grid">
         <StatCard
           label="Total orders"
-          value="—"
+          value={orders.length}
           description="All recorded orders"
           icon="▤"
         />
+
         <StatCard
           label="In progress"
-          value="—"
+          value={
+            orders.filter((order) =>
+              ["Washing", "Ironing"].includes(order.status)
+            ).length
+          }
           description="Orders being processed"
           icon="◷"
         />
+
         <StatCard
           label="Ready for delivery"
-          value="—"
+          value={
+            orders.filter(
+              (order) => order.status === "Ready for Delivery"
+            ).length
+          }
           description="Awaiting delivery"
           icon="↗"
         />
+
         <StatCard
           label="Garment alerts"
-          value="—"
+          value="0"
           description="Discrepancies to review"
           icon="!"
         />
@@ -97,17 +108,38 @@ function Dashboard() {
             <h3>Recent orders</h3>
             <p>Your latest laundry activity will appear here.</p>
           </div>
-          <span className="coming-soon">UPCOMING</span>
+          <span className="coming-soon">RECENT ACTIVITY</span>
         </div>
 
-        <div className="empty-state">
-          <div className="empty-icon">▤</div>
-          <h3>No orders yet</h3>
-          <p>
-            Orders will appear here once order management is
-            implemented.
-          </p>
-        </div>
+        {orders.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">▤</div>
+            <h3>No orders yet</h3>
+            <p>Create your first order to get started.</p>
+          </div>
+        ) : (
+          <div className="orders-list">
+            {orders.slice(0, 5).map((order) => (
+              <article className="order-list-item" key={order.id}>
+                <div>
+                  <strong>{order.customerName}</strong>
+                  <p>
+                    {order.id} · {order.phone}
+                  </p>
+                  <p>
+                    {order.garments.reduce(
+                      (total, garment) => total + garment.quantity,
+                      0
+                    )}{" "}
+                    garments · Delivery: {order.deliveryDate}
+                  </p>
+                </div>
+
+                <span className="order-status">{order.status}</span>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </>
   );
@@ -263,7 +295,7 @@ function App() {
           />
         );
       default:
-        return <Dashboard />;
+        return <Dashboard orders={orders} />;
     }
   }
 
