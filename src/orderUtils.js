@@ -50,6 +50,7 @@ export function generateOrderId(existingOrders = []) {
   return `ORD-${String(highestNumber + 1).padStart(4, "0")}`;
 }
 //--------------------------------------------------------
+
 export function createOrder({
   customerName,
   phone,
@@ -70,11 +71,13 @@ export function createOrder({
     pickupDate,
     deliveryDate,
     notes: notes.trim(),
+    totalPrice: calculateOrderTotal(garments),
     status: "Received",
     createdAt: now,
     updatedAt: now,
   };
 }
+
 
 //--------------------------------------------------------
 export function validateOrder(order) {

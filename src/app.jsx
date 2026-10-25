@@ -235,6 +235,7 @@ function GarmentTrackingPage({ orders }) {
     onAdvanceOrderStatus,
     onCancelOrder,
     onClearCancelledOrders,
+    onClearDeliveredOrders,
   }) {
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
@@ -313,6 +314,14 @@ function GarmentTrackingPage({ orders }) {
           <p><strong>Status:</strong> {selectedOrder.status}</p>
           <p><strong>Pickup Date:</strong> {selectedOrder.pickupDate}</p>
           <p><strong>Delivery Date:</strong> {selectedOrder.deliveryDate}</p>
+
+          <h3>Payment Information</h3>
+          <p className="order-detail-price">
+            <strong>Total Price:</strong>{" "}
+            ₹{selectedOrder.totalPrice ?? 0}
+          </p>
+
+          <h3>Garments</h3>
 
           <h3>Garments</h3>
           <div className="orders-list">
@@ -422,6 +431,15 @@ function GarmentTrackingPage({ orders }) {
               onClick={onClearCancelledOrders}
             >
               Clear Cancelled Orders
+            </button>
+          )}
+          {orders.some((order) => order.status === "Delivered") && (
+            <button
+              type="button"
+              className="clear-cancelled-button"
+              onClick={onClearDeliveredOrders}
+            >
+              Clear Delivered Orders
             </button>
           )}
         </div>
@@ -675,6 +693,37 @@ function App() {
     console.error(error);
   }
 }
+
+async function handleClearDeliveredOrders() {
+  const deliveredOrders = orders.filter(
+    (order) => order.status === "Delivered"
+  );
+
+  if (deliveredOrders.length === 0) return;
+
+  const confirmed = window.confirm(
+    `Permanently delete ${deliveredOrders.length} delivered order(s)? This action cannot be undone.`
+  );
+
+  if (!confirmed) return;
+
+  const updatedOrders = orders.filter(
+    (order) => order.status !== "Delivered"
+  );
+
+  try {
+    await window.laundryApp.saveOrders(updatedOrders);
+    setOrders(updatedOrders);
+    setStorageError("");
+  } catch (error) {
+    window.alert("Failed to clear delivered orders. Please try again.");
+    console.error(error);
+  }
+}
+
+//----------------------------------------------------
+
+
   //----------------------------------------------------
   function renderPage() {
     if (isLoading) {
@@ -694,6 +743,7 @@ function App() {
           onAdvanceOrderStatus={handleAdvanceOrderStatus}
           onCancelOrder={handleCancelOrder}
           onClearCancelledOrders={handleClearCancelledOrders}
+          onClearDeliveredOrders={handleClearDeliveredOrders}
         />
       );
     }
