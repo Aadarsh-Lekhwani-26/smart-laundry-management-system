@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NewOrder from "./NewOrder.jsx";
 import { prepareOrder } from "./orderUtils.js";
 
@@ -173,8 +173,8 @@ function OrdersPage({ orders, onCreateOrder }) {
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
 
-  function handleSubmit(details) {
-    const result = onCreateOrder(details);
+  async function handleSubmit(details) {
+    const result = await onCreateOrder(details);
 
     if (!result.success) {
       setErrors(result.errors);
@@ -251,52 +251,121 @@ function OrdersPage({ orders, onCreateOrder }) {
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
   const [orders, setOrders] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [storageError, setStorageError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSavedOrders() {
+      try {
+        const savedOrders = await window.laundryApp.loadOrders();
+
+        if (!Array.isArray(savedOrders)) {
+          throw new Error("The saved orders data is invalid.");
+        }
+
+        if (isMounted) {
+          setOrders(savedOrders);
+          setStorageError("");
+        }
+      } catch (error) {
+        console.error("Failed to load orders:", error);
+
+        if (isMounted) {
+          setStorageError(
+            "Could not load saved orders. Please restart the app or check its local storage."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadSavedOrders();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const currentPage = navigation.find(
     (item) => item.id === activePage
   );
 
-  function handleCreateOrder(details) {
+  async function handleCreateOrder(details) {
     const result = prepareOrder(details, orders);
 
     if (!result.success) {
       return result;
     }
 
-    setOrders((previousOrders) => [
-      result.order,
-      ...previousOrders,
-    ]);
+    const updatedOrders = [result.order, ...orders];
 
-    return result;
+    try {
+      await window.laundryApp.saveOrders(updatedOrders);
+
+      setOrders(updatedOrders);
+      setStorageError("");
+
+      return result;
+    } catch (error) {
+      console.error("Failed to save order:", error);
+
+      setStorageError(
+        "The order could not be saved. Please try again."
+      );
+
+      return {
+        success: false,
+        errors: {
+          general:
+            "Unable to save this order. Your existing orders have not been changed. Please try again.",
+        },
+      };
+    }
   }
 
   function renderPage() {
-    switch (activePage) {
-      case "orders":
-        return (
-          <OrdersPage
-            orders={orders}
-            onCreateOrder={handleCreateOrder}
-          />
-        );
-      case "pricing":
-        return (
-          <PlaceholderPage
-            title="Transparent Pricing"
-            description="Manage washing and ironing prices and calculate bills."
-          />
-        );
-      case "garments":
-        return (
-          <PlaceholderPage
-            title="Garment Tracking"
-            description="Track garment quantities and identify discrepancies."
-          />
-        );
-      default:
-        return <Dashboard orders={orders} />;
+    if (isLoading) {
+      return (
+        <section className="content-card">
+          <h3>Loading orders...</h3>
+          <p>Please wait while your saved orders are retrieved.</p>
+        </section>
+      );
     }
+
+    if (activePage === "orders") {
+      return (
+        <OrdersPage
+          orders={orders}
+          onCreateOrder={handleCreateOrder}
+        />
+      );
+    }
+
+    if (activePage === "pricing") {
+      return (
+        <PlaceholderPage
+          title="Transparent Pricing"
+          description="Manage washing and ironing prices and calculate bills."
+        />
+      );
+    }
+
+    if (activePage === "garments") {
+      return (
+        <PlaceholderPage
+          title="Garment Tracking"
+          description="Track garment quantities and identify discrepancies."
+        />
+      );
+    }
+
+    return <Dashboard orders={orders} />;
   }
 
   return (
@@ -312,6 +381,7 @@ function App() {
             <p className="breadcrumb">Workspace /</p>
             <h1>{currentPage.label}</h1>
           </div>
+
           <div className="user-badge">
             <span className="user-avatar">SL</span>
             <div>
@@ -320,6 +390,22 @@ function App() {
             </div>
           </div>
         </header>
+
+        {storageError && (
+          <div
+            role="alert"
+            style={{
+              margin: "16px 24px 0",
+              padding: "12px 16px",
+              border: "1px solid #e5a4a4",
+              borderRadius: "8px",
+              background: "#fff1f1",
+              color: "#922b2b",
+            }}
+          >
+            {storageError}
+          </div>
+        )}
 
         <div className="page-content">{renderPage()}</div>
 
@@ -331,5 +417,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
