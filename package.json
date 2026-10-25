@@ -9,7 +9,8 @@
     "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on http://127.0.0.1:5173 && electron .\"",
     "build": "vite build",
     "preview": "vite preview",
-    "package:mac": "npm run build && electron-builder --mac dmg"
+    "package:mac": "npm run build && electron-builder --mac dmg",
+    "test": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "electron": "^45.0.0",
     "electron-builder": "^26.18.0",
     "vite": "^8.3.5",
+    "vitest": "^4.1.12",
     "wait-on": "^9.5.1"
   }
 }
