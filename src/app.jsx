@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import NewOrder from "./NewOrder.jsx";
+import { prepareOrder } from "./orderUtils.js";
 
 const navigation = [
   { id: "dashboard", label: "Dashboard", icon: "◫" },
@@ -135,20 +137,115 @@ function PlaceholderPage({ title, description }) {
   );
 }
 
+function OrdersPage({ orders, onCreateOrder }) {
+  const [showForm, setShowForm] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  function handleSubmit(details) {
+    const result = onCreateOrder(details);
+
+    if (!result.success) {
+      setErrors(result.errors);
+      return;
+    }
+
+    setErrors({});
+    setShowForm(false);
+  }
+
+  if (showForm) {
+    return (
+      <NewOrder
+        onCancel={() => {
+          setErrors({});
+          setShowForm(false);
+        }}
+        onSubmit={handleSubmit}
+        errors={errors}
+      />
+    );
+  }
+
+  return (
+    <>
+      <section className="content-card">
+        <div className="section-heading">
+          <div>
+            <h2>Order Management</h2>
+            <p>Create and manage customer laundry orders.</p>
+          </div>
+
+          <button
+            type="button"
+            className="primary-button"
+            onClick={() => setShowForm(true)}
+          >
+            + New Order
+          </button>
+        </div>
+
+        {orders.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">▤</div>
+            <h3>No orders yet</h3>
+            <p>Create your first order to get started.</p>
+          </div>
+        ) : (
+          <div className="orders-list">
+            {orders.map((order) => (
+              <article className="order-list-item" key={order.id}>
+                <div>
+                  <strong>{order.customerName}</strong>
+                  <p>{order.id} · {order.phone}</p>
+                  <p>
+                    {order.garments.reduce(
+                      (total, garment) => total + garment.quantity,
+                      0
+                    )}{" "}
+                    garments · Delivery: {order.deliveryDate}
+                  </p>
+                </div>
+
+                <span className="order-status">{order.status}</span>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
 function App() {
   const [activePage, setActivePage] = useState("dashboard");
+  const [orders, setOrders] = useState([]);
 
   const currentPage = navigation.find(
     (item) => item.id === activePage
   );
 
+  function handleCreateOrder(details) {
+    const result = prepareOrder(details, orders);
+
+    if (!result.success) {
+      return result;
+    }
+
+    setOrders((previousOrders) => [
+      result.order,
+      ...previousOrders,
+    ]);
+
+    return result;
+  }
+
   function renderPage() {
     switch (activePage) {
       case "orders":
         return (
-          <PlaceholderPage
-            title="Order Management"
-            description="Create, update, search, and track laundry orders."
+          <OrdersPage
+            orders={orders}
+            onCreateOrder={handleCreateOrder}
           />
         );
       case "pricing":
