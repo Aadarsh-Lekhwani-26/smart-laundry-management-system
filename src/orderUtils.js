@@ -8,6 +8,8 @@ export const ORDER_STATUSES = [
   "Ready for Delivery",
   "Delivered",
 ];
+
+export const CANCELLED_STATUS = "Cancelled";
 //--------------------------------------------------------
 export function generateOrderId(existingOrders = []) {
   const highestNumber = existingOrders.reduce((highest, order) => {
@@ -130,6 +132,10 @@ export function prepareOrder(orderDetails, existingOrders = []) {
 
 //order status management
 export function getNextOrderStatus(currentStatus) {
+  if (currentStatus === CANCELLED_STATUS) {
+    return null;
+  }
+
   const currentIndex = ORDER_STATUSES.indexOf(currentStatus);
 
   if (currentIndex === -1) {
@@ -143,7 +149,17 @@ export function getNextOrderStatus(currentStatus) {
   return ORDER_STATUSES[currentIndex + 1];
 }
 
+
 export function updateOrderStatus(order, newStatus) {
+
+  if (order.status === CANCELLED_STATUS) {
+    return {
+      success: false,
+      error: "Cancelled orders cannot be advanced.",
+      order: null,
+    };
+  }
+
   if (!ORDER_STATUSES.includes(newStatus)) {
     return {
       success: false,
@@ -182,5 +198,44 @@ export function updateOrderStatus(order, newStatus) {
   };
 }
 
-//--------------------------------------------------------
+//------------------------order cancelling--------------------------------
+
+
+export function cancelOrder(order) {
+  if (!order) {
+    return {
+      success: false,
+      error: "Order not found.",
+      order: null,
+    };
+  }
+
+  if (order.status === CANCELLED_STATUS) {
+    return {
+      success: false,
+      error: "This order is already cancelled.",
+      order: null,
+    };
+  }
+
+  if (order.status === "Delivered") {
+    return {
+      success: false,
+      error: "Delivered orders cannot be cancelled.",
+      order: null,
+    };
+  }
+
+  return {
+    success: true,
+    error: null,
+    order: {
+      ...order,
+      status: CANCELLED_STATUS,
+      updatedAt: new Date().toISOString(),
+    },
+  };
+}
+
+//-----------------------------------------------------------
 

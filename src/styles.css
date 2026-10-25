@@ -887,3 +887,57 @@ button {
 .order-details .orders-list {
   margin-top: 4px;
 }
+
+/* //-------------------------cancel order button css */
+/* Cancel Order Button */
+.cancel-order-button {
+  background-color: #fff1f0;
+  color: #c0392b;
+  border: 1px solid #f5c2c0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.cancel-order-button:hover {
+  background-color: #fee2e2;
+  border-color: #e99a96;
+  transform: translateY(-1px);
+}
+
+.cancel-order-button:active {
+  transform: translateY(0);
+}
+
+.cancel-order-button:focus-visible {
+  outline: 2px solid #c0392b;
+  outline-offset: 2px;
+}
+
+/* ------------------clear cancelled button---------------------- */
+.clear-cancelled-button {
+  background: #fff1f0;
+  color: #b42318;
+  border: 1px solid #f5c2c0;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.clear-cancelled-button:hover {
+  background: #fee2e2;
+  border-color: #e99a96;
+}
+
+.clear-cancelled-button:focus-visible {
+  outline: 2px solid #b42318;
+  outline-offset: 2px;
+}
+/* ------------------------------------

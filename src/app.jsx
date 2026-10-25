@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 import NewOrder from "./NewOrder.jsx";
 import {
+  ORDER_STATUSES,
+  CANCELLED_STATUS,
   prepareOrder,
   getNextOrderStatus,
   updateOrderStatus,
-  ORDER_STATUSES
-} from "./orderUtils.js";
+  cancelOrder,
+} from "./orderUtils";
 
 
 
@@ -227,10 +229,12 @@ function GarmentTrackingPage({ orders }) {
   );
 }
 //------------------------_------------
-function OrdersPage({
+  function OrdersPage({
     orders,
     onCreateOrder,
     onAdvanceOrderStatus,
+    onCancelOrder,
+    onClearCancelledOrders,
   }) {
   const [showForm, setShowForm] = useState(false);
   const [errors, setErrors] = useState({});
@@ -397,7 +401,33 @@ function OrdersPage({
               Clear filters
             </button>
           )}
+          
+          {(statusFilter !== "All" || searchQuery) && (
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => {
+                setStatusFilter("All");
+                setSearchQuery("");
+              }}
+            >
+              Clear filters
+            </button>
+          )}
+
+          {orders.some((order) => order.status === CANCELLED_STATUS) && (
+            <button
+              type="button"
+              className="clear-cancelled-button"
+              onClick={onClearCancelledOrders}
+            >
+              Clear Cancelled Orders
+            </button>
+          )}
         </div>
+
+
+        
 
         {filteredOrders.length === 0 ? (
           <div className="empty-state">
@@ -444,7 +474,24 @@ function OrdersPage({
                       >
                         Move to {getNextOrderStatus(order.status)}
                       </button>
+                      
                     )}
+
+                    {/* //--------------------------cancel button-------------- */}
+                    {order.status !== "Delivered" &&
+                    order.status !== "Cancelled" && (
+                      <button
+                        type="button"
+                        className="cancel-order-button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onCancelOrder(order.id);
+                        }}
+                      >
+                        Cancel Order
+                      </button>
+                    )}
+                    {/* //---------------------------------------------------- */}
                   </div>
                 </article>
               ))}
@@ -569,7 +616,65 @@ function App() {
         "Could not save the status update. Please try again."
       );
     }
+  }
+  //-------------------------cancel order fucntion---------------------------
+  async function handleCancelOrder(orderId) {
+    const confirmed = window.confirm(
+      "Are you sure you want to cancel this order?"
+    );
+
+    if (!confirmed) return;
+
+    const existingOrder = orders.find((order) => order.id === orderId);
+    if (!existingOrder) return;
+
+    const result = cancelOrder(existingOrder);
+
+    if (!result.success) {
+      window.alert(result.error);
+      return;
+    }
+
+    const updatedOrders = orders.map((order) =>
+      order.id === orderId ? result.order : order
+    );
+
+    try {
+      await window.laundryApp.saveOrders(updatedOrders);
+      setOrders(updatedOrders);
+    } catch (error) {
+      window.alert("Failed to cancel the order. Please try again.");
+      console.error(error);
+    }
   } 
+  //----------------------------------------------------
+  async function handleClearCancelledOrders() {
+  const cancelledOrders = orders.filter(
+    (order) => order.status === CANCELLED_STATUS
+  );
+
+  if (cancelledOrders.length === 0) {
+    return;
+  }
+
+  const confirmed = window.confirm(
+    `Permanently delete ${cancelledOrders.length} cancelled order(s)? This action cannot be undone.`
+  );
+
+  if (!confirmed) return;
+
+  const updatedOrders = orders.filter(
+    (order) => order.status !== CANCELLED_STATUS
+  );
+
+  try {
+    await window.laundryApp.saveOrders(updatedOrders);
+    setOrders(updatedOrders);
+  } catch (error) {
+    window.alert("Failed to clear cancelled orders. Please try again.");
+    console.error(error);
+  }
+}
   //----------------------------------------------------
   function renderPage() {
     if (isLoading) {
@@ -587,6 +692,8 @@ function App() {
           orders={orders}
           onCreateOrder={handleCreateOrder}
           onAdvanceOrderStatus={handleAdvanceOrderStatus}
+          onCancelOrder={handleCancelOrder}
+          onClearCancelledOrders={handleClearCancelledOrders}
         />
       );
     }
