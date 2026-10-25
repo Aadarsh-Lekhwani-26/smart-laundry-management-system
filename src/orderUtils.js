@@ -47,3 +47,56 @@ export function createOrder({
   };
 }
 
+export function validateOrder(order) {
+  const errors = {};
+
+  if (!order.customerName?.trim()) {
+    errors.customerName = "Customer name is required.";
+  }
+
+  if (!order.phone?.trim()) {
+    errors.phone = "Phone number is required.";
+  } else if (!/^[6-9]\d{9}$/.test(order.phone.trim())) {
+    errors.phone = "Enter a valid 10-digit Indian mobile number.";
+  }
+
+  if (!order.pickupAddress?.trim()) {
+    errors.pickupAddress = "Pickup address is required.";
+  }
+
+  if (!Array.isArray(order.garments) || order.garments.length === 0) {
+    errors.garments = "Add at least one garment.";
+  } else {
+    const invalidGarment = order.garments.some(
+      (garment) =>
+        !garment.name?.trim() ||
+        !Number.isInteger(garment.quantity) ||
+        garment.quantity <= 0
+    );
+
+    if (invalidGarment) {
+      errors.garments = "Each garment needs a name and a positive whole-number quantity.";
+    }
+  }
+
+  if (!order.pickupDate) {
+    errors.pickupDate = "Pickup date is required.";
+  }
+
+  if (!order.deliveryDate) {
+    errors.deliveryDate = "Delivery date is required.";
+  }
+
+  if (
+    order.pickupDate &&
+    order.deliveryDate &&
+    order.deliveryDate < order.pickupDate
+  ) {
+    errors.deliveryDate = "Delivery date cannot be before pickup date.";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+}
