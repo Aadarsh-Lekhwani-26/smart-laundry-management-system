@@ -1,5 +1,62 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("node:path");
+const fs = require("node:fs/promises");
+
+function getOrdersFilePath() {
+  return path.join(app.getPath("userData"), "orders.json");
+}
+
+async function loadOrders() {
+  const filePath = getOrdersFilePath();
+
+  try {
+    const fileContents = await fs.readFile(filePath, "utf8");
+    const orders = JSON.parse(fileContents);
+
+    if (!Array.isArray(orders)) {
+      throw new Error("Stored orders data must be an array.");
+    }
+
+    return orders;
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+async function saveOrders(orders) {
+  if (!Array.isArray(orders)) {
+    throw new Error("Orders must be provided as an array.");
+  }
+
+  const filePath = getOrdersFilePath();
+  const temporaryFilePath = `${filePath}.tmp`;
+
+  await fs.mkdir(path.dirname(filePath), { recursive: true });
+
+  await fs.writeFile(
+    temporaryFilePath,
+    JSON.stringify(orders, null, 2),
+    "utf8"
+  );
+
+  await fs.rename(temporaryFilePath, filePath);
+
+  return { success: true };
+}
+
+function registerStorageHandlers() {
+  ipcMain.handle("orders:load", async () => {
+    return loadOrders();
+  });
+
+  ipcMain.handle("orders:save", async (_event, orders) => {
+    return saveOrders(orders);
+  });
+}
 
 function createWindow() {
   const window = new BrowserWindow({
@@ -23,6 +80,7 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+  registerStorageHandlers();
   createWindow();
 
   app.on("activate", () => {
