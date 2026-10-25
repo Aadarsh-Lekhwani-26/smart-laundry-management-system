@@ -185,6 +185,7 @@ function OrdersPage({
   const [errors, setErrors] = useState({});
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   //----------------searching orders
   const query = searchQuery.trim().toLowerCase();
@@ -228,6 +229,52 @@ function OrdersPage({
     );
   }
 
+
+  if (selectedOrder) {
+    return (
+      <section className="content-card">
+        <div className="section-heading">
+          <div>
+            <h2>Order Details</h2>
+            <p>{selectedOrder.id}</p>
+          </div>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setSelectedOrder(null)}
+          >
+            ← Back to Orders
+          </button>
+        </div>
+
+        <div className="order-details">
+          <h3>Customer Information</h3>
+          <p><strong>Name:</strong> {selectedOrder.customerName}</p>
+          <p><strong>Phone:</strong> {selectedOrder.phone}</p>
+          <p><strong>Pickup Address:</strong> {selectedOrder.pickupAddress}</p>
+
+          <h3>Order Information</h3>
+          <p><strong>Status:</strong> {selectedOrder.status}</p>
+          <p><strong>Pickup Date:</strong> {selectedOrder.pickupDate}</p>
+          <p><strong>Delivery Date:</strong> {selectedOrder.deliveryDate}</p>
+
+          <h3>Garments</h3>
+          <div className="orders-list">
+            {selectedOrder.garments.map((garment, index) => (
+              <div className="order-list-item" key={`${garment.name}-${index}`}>
+                <span>{garment.name}</span>
+                <strong>Quantity: {garment.quantity}</strong>
+              </div>
+            ))}
+          </div>
+
+          <h3>Additional Notes</h3>
+          <p>{selectedOrder.notes || "No additional notes provided."}</p>
+        </div>
+      </section>
+    );
+  }
   return (
     <>
       <section className="content-card">
@@ -314,7 +361,12 @@ function OrdersPage({
         ) : (
             <div className="orders-list">
               {filteredOrders.map((order) => (
-                <article className="order-list-item" key={order.id}>
+                <article
+                  className="order-list-item"
+                  key={order.id}
+                  onClick={() => setSelectedOrder(order)}
+                  style={{ cursor: "pointer" }}
+                >
                   <div>
                     <strong>{order.customerName}</strong>
                     <p>{order.id} · {order.phone}</p>
@@ -334,7 +386,10 @@ function OrdersPage({
                       <button
                         type="button"
                         className="secondary-button"
-                        onClick={() => onAdvanceOrderStatus(order.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onAdvanceOrderStatus(order.id);
+                        }}
                       >
                         Move to {getNextOrderStatus(order.status)}
                       </button>

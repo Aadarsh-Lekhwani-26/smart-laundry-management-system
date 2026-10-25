@@ -866,5 +866,24 @@ button {
   font: inherit;
 }
 
-/* ----------------------------------- */
+/* -----------------below is css for card details on each order------------------ */
 
+.order-details {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.order-details h3 {
+  margin: 16px 0 4px;
+}
+
+.order-details p {
+  margin: 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.order-details .orders-list {
+  margin-top: 4px;
+}
